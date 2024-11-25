@@ -8,6 +8,8 @@ import 'package:paymenttestmethode/upi.dart';
 import 'apitest/apiscreen/listtypeapi.dart';
 import 'apitest/apiscreen/object_screen.dart';
 import 'apitest/apiscreen/signupScreen.dart';
+import 'secondApi/screen/GetApiscreenapi.dart';
+import 'secondApi/screen/postApiScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,7 +27,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Listtypeapi(),
+      home: Postapiscreen(),
     );
   }
 }
