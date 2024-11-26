@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 
 import 'package:paymenttestmethode/secondApi/model/postmodel.dart';
 
@@ -13,25 +14,58 @@ class Postapiscreen extends StatefulWidget {
 }
 
 class _PostapiscreenState extends State<Postapiscreen> {
+  // Future<Postmodel?> postApiFetch() async {
+  //   const String url = "https://jsonplaceholder.typicode.com/posts";
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(url),
+  //       body: {
+  //         "title": "This is my title",
+  //         "body": "This is my new body",
+  //         "userId": "1",
+  //       },
+  //     );
+
+  //     if (response.statusCode == 201) {
+  //       final data = jsonDecode(response.body);
+  //       print("Response Data: $data");
+  //       return Postmodel.fromJson(data);
+  //     } else {
+  //       print("Error: ${response.statusCode}");
+  //       return null; // Return null if the status code is not 201
+  //     }
+  //   } catch (e) {
+  //     print("Exception: $e");
+  //     return null; // Return null in case of an exception
+  //   }
+  // }
+
   Future<Postmodel?> postApiFetch() async {
     const String url = "https://jsonplaceholder.typicode.com/posts";
+
     try {
-      final response = await http.post(
+      Map<String, dynamic> bodyData = {
+        "title": "This is my title",
+        "body": "This is my new body",
+        "userId": "1",
+      };
+      // Preparing the POST request
+      Response response = await http.post(
         Uri.parse(url),
-        body: {
-          "title": "This is my title",
-          "body": "This is my new body",
-          "userId": "1",
+        headers: {
+          "Content-Type": "application/json", // Specify JSON content type
         },
+        body: jsonEncode(bodyData),
       );
 
+      // Checking the response status
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
         print("Response Data: $data");
-        return Postmodel.fromJson(data);
+        return Postmodel.fromJson(data); // Return parsed model
       } else {
-        print("Error: ${response.statusCode}");
-        return null; // Return null if the status code is not 201
+        print("Error: ${response.statusCode} - ${response.body}");
+        return null; // Return null for non-successful responses
       }
     } catch (e) {
       print("Exception: $e");
