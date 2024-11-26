@@ -10,6 +10,7 @@ import 'apitest/apiscreen/object_screen.dart';
 import 'apitest/apiscreen/signupScreen.dart';
 import 'secondApi/screen/GetApiscreenapi.dart';
 import 'secondApi/screen/deleteScreen.dart';
+import 'secondApi/screen/dogsScren.dart';
 import 'secondApi/screen/postApiScreen.dart';
 import 'secondApi/screen/putApiScreen.dart';
 import 'secondApi/screen/putwithoutmodelScreen.dart';
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Deletescreen(),
+      home: Dogsscren(),
     );
   }
 }
