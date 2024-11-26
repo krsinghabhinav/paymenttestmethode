@@ -12,7 +12,7 @@ class Bghomescreen extends StatefulWidget {
 }
 
 class _BghomescreenState extends State<Bghomescreen> {
-  final bgController = Get.put(Bghomecontroller());
+  final bgController = Get.put(BackgroundRemovalController());
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,8 @@ class _BghomescreenState extends State<Bghomescreen> {
               width: Get.width,
               child: Obx(() {
                 // Display the current image (original or processed)
-                final Uint8List? imageData = bgController.chooseImageData.value;
+                final Uint8List? imageData =
+                    bgController.selectedImageBytes.value;
 
                 // Check if image data is available
                 if (imageData != null) {
@@ -80,37 +81,6 @@ class _BghomescreenState extends State<Bghomescreen> {
                   );
                 }
               }),
-
-              // child: Obx(() {
-              //   // Display the current image (original or processed)
-              //   final Uint8List? imageData = bgController.chooseImageData.value;
-
-              //   // Check if image data is available
-              //   if (imageData != null) {
-              //     return bgController.isloading.value
-              //         ? Center(
-              //             child: CircularProgressIndicator(
-              //               color: Colors
-              //                   .blue, // Blue color for the circular progress
-              //               strokeWidth:
-              //                   4.0, // Adjust the thickness of the circular progress
-              //             ),
-              //           )
-              //         : Image.memory(
-              //             imageData,
-              //             fit: BoxFit.cover,
-              //           );
-              //   } else {
-              //     // If no image is selected or processed
-              //     return const Center(
-              //       child: Text(
-              //         "No image selected or processed yet",
-              //         style:
-              //             TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              //       ),
-              //     );
-              //   }
-              // }),
             ),
           ),
           Padding(
@@ -145,7 +115,7 @@ class _BghomescreenState extends State<Bghomescreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
-                  await bgController.removebg();
+                  await bgController.removeBackground();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green, // Background color
@@ -170,3 +140,36 @@ class _BghomescreenState extends State<Bghomescreen> {
     );
   }
 }
+
+
+
+ // child: Obx(() {
+              //   // Display the current image (original or processed)
+              //   final Uint8List? imageData = bgController.chooseImageData.value;
+
+              //   // Check if image data is available
+              //   if (imageData != null) {
+              //     return bgController.isloading.value
+              //         ? Center(
+              //             child: CircularProgressIndicator(
+              //               color: Colors
+              //                   .blue, // Blue color for the circular progress
+              //               strokeWidth:
+              //                   4.0, // Adjust the thickness of the circular progress
+              //             ),
+              //           )
+              //         : Image.memory(
+              //             imageData,
+              //             fit: BoxFit.cover,
+              //           );
+              //   } else {
+              //     // If no image is selected or processed
+              //     return const Center(
+              //       child: Text(
+              //         "No image selected or processed yet",
+              //         style:
+              //             TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              //       ),
+              //     );
+              //   }
+              // }),

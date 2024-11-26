@@ -2,80 +2,76 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image/image.dart' as img; // Import image package
+import 'package:image/image.dart' as img;
 import 'package:http/http.dart' as http;
 import 'package:paymenttestmethode/bgremoval/constenst/base_api_url.dart';
 
-class Bghomecontroller extends GetxController {
-  final Rx<Uint8List?> chooseImageData = Rx<Uint8List?>(null);
+class BackgroundRemovalController extends GetxController {
+  final selectedImageBytes = Rx<Uint8List?>(null); // Holds selected image data
+  RxBool isloading = false.obs; // Loading indicator
 
-  RxBool isloading = false.obs;
-
+  /// Pick an image from the gallery
   Future<void> pickImage() async {
     final imagePicker = ImagePicker();
     try {
-      XFile? selectedImage =
+      final selectedImage =
           await imagePicker.pickImage(source: ImageSource.gallery);
 
       if (selectedImage != null) {
-        Uint8List imageBytes = await selectedImage.readAsBytes();
-        chooseImageData.value = imageBytes; // Update observable with image data
+        // Read image as bytes
+        selectedImageBytes.value = await selectedImage.readAsBytes();
       } else {
-        Get.snackbar("Image Picker", "No image selected");
+        Get.snackbar("No Image Selected", "Please select an image to proceed.");
       }
     } catch (e) {
-      Get.snackbar("Error", "Error picking image: $e");
+      Get.snackbar("Error", "Failed to pick image: $e");
     }
   }
 
+  /// Resize the image if it exceeds the 50-megapixel limit
   Uint8List resizeImage(Uint8List imageBytes) {
-    // Decode the image
-    img.Image? originalImage = img.decodeImage(imageBytes);
-    if (originalImage == null) {
-      throw Exception("Failed to decode image");
-    }
+    final originalImage = img.decodeImage(imageBytes);
+    if (originalImage == null) throw Exception("Invalid image format");
 
-    // Check if resizing is needed (50 megapixels = 5000 x 10000 pixels max)
-    int maxPixels = 5000 * 10000;
+    const int maxPixels = 5000 * 10000; // 50 megapixels
     if (originalImage.width * originalImage.height > maxPixels) {
       // Calculate new dimensions maintaining aspect ratio
-      double aspectRatio = originalImage.width / originalImage.height;
-      int newWidth = (5000 * aspectRatio).round();
-      int newHeight = (newWidth / aspectRatio).round();
+      final aspectRatio = originalImage.width / originalImage.height;
+      final newWidth = 5000;
+      final newHeight = (newWidth / aspectRatio).round();
 
       // Resize the image
-      img.Image resizedImage =
+      final resizedImage =
           img.copyResize(originalImage, width: newWidth, height: newHeight);
 
-      // Return resized image as Uint8List
+      // Encode resized image to bytes
       return Uint8List.fromList(img.encodeJpg(resizedImage));
     }
-
-    // No resizing needed
-    return imageBytes;
+    return imageBytes; // Return original if resizing not needed
   }
 
-  Future<void> removebg() async {
-    if (chooseImageData.value == null) {
-      Get.snackbar("Error", "No image selected to process");
+  /// Remove the background of the selected image
+  Future<void> removeBackground() async {
+    if (selectedImageBytes.value == null) {
+      Get.snackbar("Error", "Please select an image first.");
       return;
     }
 
+    isloading.value = true;
     try {
-      isloading.value = true;
-      // Resize the image before sending it to the API
-      Uint8List resizedImage = resizeImage(chooseImageData.value!);
+      // Resize the image
+      final resizedImage = resizeImage(selectedImageBytes.value!);
 
-      // Convert resized image bytes to Base64 string
-      String base64Image = base64Encode(resizedImage);
+      // Convert image to Base64 string
+      final base64Image = base64Encode(resizedImage);
 
-      // API URL and Key
-      String url = BaseApiUrl.bghomeurl; // Replace with your API URL
-      String apiKey = BaseApiUrl.apiKey; // Replace with your API Key
+      // API Details
+      const apiUrl = BaseApiUrl.bghomeurl; // Replace with actual API URL
+      const apiKey = BaseApiUrl.apiKey; // Replace with actual API Key
 
-      // Make the POST request
-      var response = await http.post(
-        Uri.parse(url),
+      // Make API request
+      final response = await http.post(
+        Uri.parse(apiUrl),
         headers: {
           'Content-Type': 'application/json',
           'X-API-Key': apiKey,
@@ -83,21 +79,20 @@ class Bghomecontroller extends GetxController {
         body: jsonEncode({'image_file_b64': base64Image}),
       );
 
-      // Handle the response
       if (response.statusCode == 200) {
-        chooseImageData.value =
-            response.bodyBytes; // Update with processed image
+        // Update with processed image
+        selectedImageBytes.value = response.bodyBytes;
         Get.snackbar("Success", "Background removed successfully!");
-        isloading.value = false;
       } else {
-        isloading.value = false;
-
-        Get.snackbar("Error",
-            "Failed to remove background: ${response.statusCode} ${response.body}");
+        Get.snackbar(
+          "Error",
+          "Failed to remove background: ${response.statusCode} ${response.reasonPhrase}",
+        );
       }
     } catch (e) {
+      Get.snackbar("Error", "An unexpected error occurred: $e");
+    } finally {
       isloading.value = false;
-      Get.snackbar("Error", "An error occurred: $e");
     }
   }
 }
