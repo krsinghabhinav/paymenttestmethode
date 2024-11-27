@@ -9,7 +9,7 @@ class DogsApiController extends GetxController {
   final dogData = Rxn<DogsModel>();
 
   // Method to fetch dog data from the API
-  Future<void> fetchDogData() async {
+  Future<DogsModel?> fetchDogData() async {
     const String url = "https://dog.ceo/api/breeds/image/random";
     try {
       final response = await http.get(
@@ -23,11 +23,14 @@ class DogsApiController extends GetxController {
         final data = jsonDecode(response.body);
         dogData.value = DogsModel.fromJson(data);
         print('Dog data fetched successfully: ${dogData.value}');
+        return dogData.value;
       } else {
         print('Failed to fetch dog data. Status code: ${response.statusCode}');
+        return null;
       }
     } catch (e) {
       print('An error occurred: $e');
+      return null;
     }
   }
 
